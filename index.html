@@ -510,12 +510,28 @@ demoColorPicker.color = { r: volR, g: volG, b: volB };
 
   window.onbeforeunload = function() {
   disconnect();
+ 		 window.close() ; 
    }
   
   window.onblur = function() {
       disconnect();
+	  		 window.close() ;
    }
  
+  document.addEventListener("menubutton", function () { 
+         disconnect();
+		 window.close ();
+    }, false);  
+
+    document.addEventListener("searchbutton", function () { 
+              disconnect();
+		 window.close() ;
+    }, false);                      
+
+    document.addEventListener("backbutton", function () { 
+             disconnect();
+		 window.close ();
+    }, false);  
   window.onload = function() {
 //    clickconnect();
    }
