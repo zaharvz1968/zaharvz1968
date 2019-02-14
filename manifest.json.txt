@@ -1,0 +1,15 @@
+{
+
+  manifest.json
+{
+  "short_name": "wifi",
+  "lang": "ru-RU",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "ic_launcher.png"
+    }
+  ]
+}
+}

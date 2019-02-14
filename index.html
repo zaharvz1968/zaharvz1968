@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>LRC-BT-WEB</title>
+     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript" src="/function.js"></script>	
+    <link href="styles.css" rel="stylesheet">
+	<link rel="shortcut icon" sizes="192x192" href="ic_launcher.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="ic_launcher.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes"> 
+<meta name="mobile-web-app-capable" content="yes">    
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" >
+ <style type="text/css">
+ 
+  body {
+   background: #000000;
+ }
+ input[id = brightW][type=range]::-webkit-slider-thumb {
+ background: #ffffff;
+}
+input[id = brightR][type=range]::-webkit-slider-thumb {
+ background: #ff0000;
+}
+input[id = brightG][type=range]::-webkit-slider-thumb {
+ background: #00ff00;
+}
+input[id = brightB][type=range]::-webkit-slider-thumb {
+ background: #0000ff;
+}
+
+ input[type=range] {
+  -webkit-appearance: none;
+  margin: 10px 0;
+  width: 75%;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 12.8px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  background: #ffffff;
+  border-radius: 25px;
+  border: 0px solid #000101;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  border: 0px solid #000000;
+  height: 20px;
+  width: 20px;
+  border-radius: 7px;
+ 
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -3.6px;
+}
+
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 12.8px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  background: #ac51b5;
+  border-radius: 25px;
+  border: 0px solid #000101;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  border: 0px solid #000000;
+  height: 20px;
+  width: 20px;
+  border-radius: 7px;
+  background: #65001c;
+  cursor: pointer;
+}
+
+ 
+    button {
+   font-size : 18px;
+
+    width: 33%;
+
+    height: 33px;
+    background: #00BBD6;
+     padding: 3px 7px;
+    color: #333;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    border: 1px solid #666;
+   }
+      button.btOn {
+    background: #ff00D6;
+	}
+  </style>
+  <script src="dist/iro.js" charset="utf-8"></script>	
+	<script>
+ var data8 = new Uint8Array(9);
+ //////////////////////////
+ if (navigator.serviceWorker.controller) {
+  console.log('[PWA Builder] active service worker found, no need to register')
+} else {
+  //Register the ServiceWorker
+  navigator.serviceWorker.register('pwabuider-sw.js', {
+    scope: './'
+  }).then(function(reg) {
+    console.log('Service worker has been registered for scope:'+ reg.scope);
+  });
+}
+
+ 
+//функция создает выпадающий список активнх групп
+function selAgr(){
+    var arrNGr = []; //создаем массив для групп
+    var nLStr = localStorage.getItem("numberLamp");
+    var  nL = Number(nLStr);	 
+//заполняем массив имеющимися номерами групп
+    for ( var k = 1; k <= 99; k++){
+        for ( var n = 1; n <= nL; n++){
+	      var y = n.toString();
+          var x = localStorage.getItem("GrN" + y);
+		  var kStr = k.toString();
+	      if ( x == kStr ){
+		    arrNGr.push(k);
+		    break;
+		  }
+	    }
+    }
+//создаем соответствующщие строки в селекторе
+    lengthArr = arrNGr.length;
+    for (var k = 0 ; k < lengthArr ; k++){
+        var nStr = k.toString();
+	    var kStr = arrNGr[k].toString();
+	    var grSelect = buildMenu.agSel;
+	    var newOption = new Option("Группа №"+kStr,kStr);
+	    newOption.id = "GrN" + nStr;
+	    grSelect.options[grSelect.options.length] = newOption;
+    }
+}
+ 
+//вызывается при выборе активной группы в селекторе
+function agCh(){
+     document.getElementById("agr").value = document.getElementById("agSel").value;
+     saveAgr();
+}
+
+function saveId(){
+//сохраняет значения при изменении параметров
+//вызывается при изменении  параметров и сохраняет значения
+   for ( var k = 1 ; k <=localStorage.getItem("numberLamp"); k++){
+      var kStr = k.toString(); 
+      var GrN = "GrN" + kStr;
+      var numGrN = document.getElementById("ng" + kStr ).value ;  
+      localStorage.setItem(GrN,numGrN );
+ 
+      var LampN = "LampN" + kStr;
+      var ipLampN = document.getElementById("ip" + kStr ).value ;  
+      localStorage.setItem(LampN,ipLampN );
+ 
+      var ChLampN = "CheckLampN" + kStr;
+      var chLampN = document.getElementById("ch" + kStr ).checked ;
+    if (chLampN)
+      localStorage.setItem(ChLampN,"1" );
+    else 
+	  localStorage.setItem(ChLampN,"0" );
+    }
+//перегружаем выпадающий список активных групп - сначала удаляем	
+   for ( var k = 0; k < lengthArr; k++){
+      var kStr = k.toString();
+      document.getElementById("GrN" + kStr).parentNode.removeChild(document.getElementById("GrN" + kStr));
+    }
+//затем выводим новый	
+    selAgr();
+}
+
+function plus(){
+//добавляет  форму для ввода чека активности ,ip и номера группы при нажатии кнопки добавить
+    var n = numLamp;
+    n++;
+    var nStr = n.toString();
+    document.querySelector("form").insertAdjacentHTML('beforeend','<p id = "inIp'+n+'"><input type="checkbox" id = "ch'+n+'" oninput = "saveId()" value="ch'+n+'">Введите IP:<input type="text" maxlength="3" oninput = "saveId()" id = "ip'+n+'" pattern="[0-9]{3}" size="3" value="101" >№группы:<input type="text" maxlength="3" onchange = "saveId()" id = "ng'+n+'" pattern="[0-9]{1,2}" size="2" value="1" ></p>');
+    var LampN = "LampN" + nStr;
+    var GrN = "GrN" + nStr;
+    var ipLampN = document.getElementById("ip" + nStr ).value ;
+    localStorage.setItem(LampN,ipLampN );
+    localStorage.setItem(GrN,"1" );
+    numLamp++;
+    localStorage.setItem("numberLamp", numLamp);
+}
+
+
+function minuse(){
+//удаляет  форму для ввода чека активности ,ip и номера группы при нажатии кнопки удалить
+    var n = numLamp;
+	var nStr = n.toString();
+	var LampN = "LampN" + nStr;
+    var ChLampN = "CheckLampN" + nStr;
+    var GrN = "GrN" + nStr;
+    document.getElementById('inIp'+nStr).parentNode.removeChild(document.getElementById('inIp'+nStr));
+    numLamp--;
+    localStorage.setItem("numberLamp", numLamp);
+    localStorage.removeItem(LampN);
+    localStorage.removeItem(ChLampN);
+    localStorage.removeItem(GrN);
+    saveId();
+} 
+
+
+  //функция создает xmlhttp для приема - передачи данных с помощью XMLHttpRequest()
+function getXmlHttp(){
+  var xmlhttp;
+  try {
+    xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+  } catch (e) {
+    try {
+      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    } catch (E) {
+      xmlhttp = false;
+    }
+  }
+  if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+    xmlhttp = new XMLHttpRequest();
+  }
+  return xmlhttp;
+}
+
+
+   
+function brightVol() {
+
+	  	document.getElementById("btEff").style.background =  '#00bbD6' ;
+		
+	document.getElementById("brW").value = document.getElementById("brightW").value;
+    document.getElementById("brR").value = document.getElementById("brightR").value;
+	document.getElementById("brG").value = document.getElementById("brightG").value;
+	document.getElementById("brB").value = document.getElementById("brightB").value;	
+
+  
+	
+    var  volW = document.getElementById("brightW").value	;
+    var  volR = document.getElementById("brightR").value	;
+    var  volG = document.getElementById("brightG").value	;
+    var  volB = document.getElementById("brightB").value	;	
+ 
+  
+	 		localStorage.setItem('brightW'+actGR, volW);
+			localStorage.setItem('brightR'+actGR, volR);
+		 	localStorage.setItem('brightG'+actGR, volG);
+			localStorage.setItem('brightB'+actGR, volB);
+
+
+	
+
+data8[0] = 76;
+data8[1] = 82 ;
+data8[2] = 67 ;
+data8[3] = 1 ;
+if ( flagOnOff == 0 ) data8[3] = 0 ;
+if ( flagOnOff == 1 ) data8[3] = 1 ;
+if ( flagEffect == 1 ) data8[3] = 2 ;
+//data8[3] = 1 ;
+data8[4] = parseInt(volW);
+data8[5] = parseInt(volR);
+data8[6] = parseInt(volG);
+data8[7] = parseInt(volB);
+data8[8] = 0x0A;
+//let volWbyte = Number(volW);
+//var xxx = new TextDecoder("koi").decode(x);
+ //volWbyte = {76, 82, 67,0,volWby76, 82, 67,0,volWbytete};//( parseInt(volW);
+var sendStr = (200, 82, 67,0) ;
+send(sendStr); // Привет, мир!+volWbyte("utf-8").toString()
+
+// writeToCharacteristic(characteristicCache, volWbyte[1]
+//characteristic.writeValue(volWbyte);
+//  writeToCharacteristic(characteristicCache, sendAr);
+ //    var req = getXmlHttp();
+ //    req.open('GET', 'http://192.168.' + ip3vol +'.'+ ip +'/bright?deviceW='+ volW+'&deviceR='+volR+'&deviceG='+volG+'&deviceB='+volB+'&deviceOn='+flagOnOff+'&deviceEff='+flagEffect , true);//
+
+ //    req.send(null);
+   
+
+   }
+  
+function changeColor (){
+	   var  volR = document.getElementById("brightR").value;///4	; 
+	   var  volG = document.getElementById("brightG").value;///4	; 
+	   var  volB = document.getElementById("brightB").value;///4	; 
+   	  demoColorPicker.color.rgb = { r: volR, g: volG, b: volB };
+	  brightVol();
+} 
+ 
+//функция обеспечивает передачу значений яркости между движками и окошками и запоминаниезначений при их изменении
+function brVol() {
+
+   var vol;
+   
+   document.getElementById("brightW").value = document.getElementById("brW").value ;
+   vol = document.getElementById("brightW").value;
+   localStorage.setItem('brightW'+actGR, vol);
+   
+   document.getElementById("brightR").value = document.getElementById("brR").value ;
+    vol = document.getElementById("brightR").value;
+   localStorage.setItem('brightR'+actGR, vol);  
+   
+   document.getElementById("brightG").value = document.getElementById("brG").value ;
+   vol = document.getElementById("brightG").value;
+   localStorage.setItem('brightG'+actGR, vol);   
+   
+   document.getElementById("brightB").value = document.getElementById("brB").value ;
+   vol = document.getElementById("brightB").value;
+   localStorage.setItem('brightB'+actGR, vol); 
+
+changeColor (); 
+  
+} 
+
+//сохраняет выбранную активную группу и устанавливает все соответствующщие значения цветов   
+function saveAgr(){
+     var vol;
+	 vol = document.getElementById("agr").value;
+	 localStorage.setItem("agr", vol); 
+	 actGR = document.getElementById("agr").value;
+
+     document.getElementById("brightR").value = localStorage.getItem("brightR"+actGR);
+     document.getElementById("brightG").value = localStorage.getItem("brightG"+actGR);
+     document.getElementById("brightB").value = localStorage.getItem("brightB"+actGR);
+     document.getElementById("brightW").value = localStorage.getItem("brightW"+actGR);
+     document.getElementById("brR").value = localStorage.getItem("brightR"+actGR);
+     document.getElementById("brG").value = localStorage.getItem("brightG"+actGR);
+     document.getElementById("brB").value = localStorage.getItem("brightB"+actGR);
+     document.getElementById("brW").value = localStorage.getItem("brightW"+actGR);
+
+     var  volR = document.getElementById("brightR").value;///4	; 
+	 var  volG = document.getElementById("brightG").value;///4	; 
+	 var  volB = document.getElementById("brightB").value;///4	; 
+     demoColorPicker.color.rgb = { r: volR, g: volG, b: volB };
+}
+
+//функция передает данные при изменении цвета на колесе  
+function colorChangeHandler(color) {
+
+    if (startFl == 0 ){ //проверяем первое включение
+	    flagM = 1;
+      document.getElementById("brightR").value = color.rgb.r;//*4;
+      document.getElementById("brightG").value = color.rgb.g;//*4;
+      document.getElementById("brightB").value = color.rgb.b;//*4;
+      document.getElementById("brR").value = color.rgb.r;//*4;
+      document.getElementById("brG").value = color.rgb.g;//*4;
+      document.getElementById("brB").value = color.rgb.b;//*4;	  
+//передаем данные только при отжатой мышке   
+    }
+    else {
+      volR = document.getElementById("brightR").value;///4	; 
+	  volG = document.getElementById("brightG").value;///4	; 
+	  volB = document.getElementById("brightB").value;///4	; 
+      demoColorPicker.color.rgb = { r: volR, g: volG, b: volB };
+    }
+    startFl = 0 ;
+}
+
+function viewdiv(){
+var el=document.getElementById("setting");
+if(el.style.display=="block"){
+el.style.display="none";
+} else {
+el.style.display="block";
+}
+}
+
+function ip3Save(){
+     var vol;
+	 vol = document.getElementById("ipRouter").value;
+	 localStorage.setItem("ipRouter", vol); 
+
+}
+
+function onOff(){
+    if ( flagOnOff == "0" ) {
+	flagOnOff = "1";
+	document.getElementById("btOn").style.background =  '#00BBD6' ;  
+	} 
+    else {
+	flagOnOff = "0" ;
+	document.getElementById("btOn").style.background =  '#98D9E3' ;
+     }	
+     brightVol();
+}
+
+function effect() {
+      flagEffect = 1 ;
+      brightVol();
+	  	document.getElementById("btEff").style.background =  '#98D9E3' ;
+	  flagEffect = 0 ;
+}
+
+function  clickconnect(){
+document.getElementsById("connect").click;
+
+}
+
+</script>
+ 
+</head>
+<body>
+<div id="demoWheel" ></div>
+<script type="text/javascript">
+//запускаем цветовое колесо	
+      var demoColorPicker = new iro.ColorPicker("#demoWheel", {
+        width: 360,
+        height: 360,
+        markerRadius: 8,
+ //       color: "#f00",
+        borderWidth: 2,
+        padding: 4,
+        anticlockwise: true,
+        css: {
+          body: {
+         //   "background-color": "$color",
+            "color": "$color"
+          },
+          ".test": {
+            "border-color": "$color",
+            "color": "$color"
+          }
+        }
+      });
+
+//под скриптом формируем движки и окошки для ввода значения цвета	  
+</script>
+
+<script>
+//определяем глобальные переменные
+
+    var numLamp = 1;     //счетчик светильников
+    var numGr = 1;       //число групп
+    var lengthArr = 1;
+    var startFl = 1;     //флаг старта
+    var actGR = localStorage.getItem("agr"); //активная группа
+	var flagM = 0 ;
+	var flagOnOff = "1" ;
+	var flagEffect = "0" ;
+	var butFl = 0;
+
+	
+</script>
+
+ <p> <input  type="range" min="0" max="255" id="brightW" 
+     onchange="changeColor ()" value="100" ><input type="text" id = "brW" onchange="brVol()" maxlength="3" pattern="[0-9]{1,4}" size="2" value="100" > W</p>
+ <p> <input type="range" min="0" max="255" id="brightR" 
+     onchange="changeColor ()" value="100"><input type="text" id = "brR" onchange="brVol()" maxlength="3" pattern="[0-9]{1,4}" size="2" value="100" > R</p>
+ <p> <input type="range" min="0" max="255" id="brightG" 
+     onchange="changeColor ()" value="100"><input type="text" id = "brG" onchange="brVol()" maxlength="3" pattern="[0-9]{1,4}" size="2" value="100" > G</p>
+ <p> <input type="range" min="0" max="256" id="brightB" 
+     onchange="changeColor ()" value="100"><input type="text" id = "brB" onchange="brVol()" maxlength="3" pattern="[0-9]{1,4}" size="2" value="100" > B<br></p>
+
+<p><button id="btOn" onclick="onOff()">Вкл/Выкл</button><button id="btEff" onclick="effect()">Эффект</button></p>
+
+<!--окошко для ввода номера активной группы   -->
+<!-- <p>Вкл/Выкл<input type="button" id = "btOn" onclick="onOff()"> Эффект<input type="button" id = "btEff" onclick="effect()"> Настройки<input type="button" id = "btView" onclick="viewdiv()"><br>	</p> -->
+<div id = "setting" style="display:none;" >
+<p>Активная группа:<input type="text" id = "agr" oninput = "saveAgr()" maxlength="2" pattern="[0-9]{1,2}" size="2" value="1" ><br> </p>
+
+<script>
+//////////////////////////
+
+//при запуске устанавливаем позиции движков и значения в окошках сохраненные ранее
+ 
+//////////////////
+
+actGR = localStorage.getItem("agr");
+
+document.getElementById("agr").value = actGR;
+
+document.getElementById("brightR").value = localStorage.getItem("brightR"+actGR);
+document.getElementById("brightG").value = localStorage.getItem("brightG"+actGR);
+document.getElementById("brightB").value = localStorage.getItem("brightB"+actGR);
+document.getElementById("brightW").value = localStorage.getItem("brightW"+actGR);
+
+document.getElementById("brR").value = localStorage.getItem("brightR"+actGR);
+document.getElementById("brG").value = localStorage.getItem("brightG"+actGR);
+document.getElementById("brB").value = localStorage.getItem("brightB"+actGR);
+document.getElementById("brW").value = localStorage.getItem("brightW"+actGR);
+
+demoColorPicker.on("color:change", colorChangeHandler); //включаем слушатель колесаtouchend
+
+document.getElementById('demoWheel').onmouseup = function() { //getElementById('demoWheel')
+	  if ( flagM == 1 ){ 
+         brightVol();
+	  }
+}
+document.getElementById('demoWheel').ontouchend = function() { 
+	  if ( flagM == 1 ){ 
+         brightVol();
+	  }
+}
+  //    document.body.onmousedown = function() { flagM = 0 }
+var  volR = document.getElementById("brightR").value;///4	; 
+var  volG = document.getElementById("brightG").value;///4	; 
+var  volB = document.getElementById("brightB").value;///4	; 
+demoColorPicker.color = { r: volR, g: volG, b: volB };
+
+  window.onbeforeunload = function() {
+  disconnect();
+   }
+  
+  window.onblur = function() {
+      disconnect();
+   }
+ 
+  window.onload = function() {
+//    clickconnect();
+   }
+   
+</script>
+
+<form name = "buildMenu">
+<!-- в селект разворачиваем выпадающий список групп-->
+   <select id = "agSel" onchange = "agCh()"></select>  ip 192.168.<input type="text" id = "ipRouter" onchange = "ip3Save()" maxlength="2" pattern="[0-9]{1,2}" size="2" value="1" >.1
+<!-- постоянная форма для ввода чека активности ,ip и номера группы   -->
+   <p id = "1"><input type="checkbox"  id = "ch1" oninput = "saveId()"  value="ch1">Введите IP:<input type="text" id = "ip1" maxlength="3" oninput = "saveId()" pattern="[0-9]{3}" size="3" value="101" >№группы:<input type="text" oninput = "saveId()" maxlength="2" id = "ng1" pattern="[0-9]{1,2}" size="2" value="1" ></p>
+</form>
+ 
+<!-- кнопки добавить\удалить   -->
+<!--<p><input type=button onclick=plus()> Добавить<input type=button onclick=minuse()>Удалить</p>-->
+<p><button  onclick="plus()">Добавить</button><button  onclick="minuse()">Удалить</button></p>
+<script>
+//скрипт разворачивает в форму сохраненные строки для ввода чека активности ,ip и номера группы
+selAgr(); //функция создает селектор групп--
+    document.getElementById("ipRouter").value = localStorage.getItem("ipRouter");
+document.getElementById("agSel").value = actGR;
+    document.getElementById("ip1").value = localStorage.getItem("LampN1");
+    document.getElementById("ng1").value = localStorage.getItem("GrN1"); 
+	   var b = localStorage.getItem("CheckLampN1");
+    if (b == "1" )
+        document.getElementById("ch1").checked = true; 
+     else 
+        document.getElementById("ch1" ).checked = false; 	
+		
+var  nl = localStorage.getItem("numberLamp");
+for ( var n = 2 ; n <=nl ; n++) {
+//выводим форму
+    document.querySelector("form").insertAdjacentHTML('beforeend','<p id = "inIp'+n+'"><input type="checkbox" id = "ch'+n+'" oninput = "saveId()" value="ch'+n+'">Введите IP:<input type="text"  id = "ip'+n+'" maxlength="3" oninput = "saveId()" pattern="[0-9]{3}" size="3" value="101" >№группы:<input type="text"  id = "ng'+n+'" onchange = "saveId()" maxlength="2" pattern="[0-9]{1,2}" size="2" value="1" ></p>');
+    var nStr = n.toString();
+//восстанавливаем значение ip
+    var LampN = "LampN" + nStr;                                                
+    document.getElementById("ip" + nStr ).value = localStorage.getItem(LampN); 
+//восстанавливаем значение номера группы
+    var GrN = "GrN" + nStr;
+    document.getElementById("ng" + nStr ).value = localStorage.getItem(GrN); 
+//восстанавливаем значение чека
+    var ChLampN = "CheckLampN" + nStr;
+    var b = localStorage.getItem(ChLampN);
+    if (b == "1" )
+        document.getElementById("ch" + nStr ).checked = true; 
+     else 
+        document.getElementById("ch" + nStr ).checked = false; 	
+	
+    numLamp++;
+}
+localStorage.setItem("numberLamp", numLamp);
+</script>
+
+</div>
+<button id="connect" type="button">Connect</button>
+
+<!--//<button id="disconnect" type="button">Disconnect</button>-->
+
+<div id="terminal"></div>
+
+<!--<form id="send-form">
+    <input id="input" type="text">
+    <button type="submit">Send</button>
+</form>-->
+<script>
+
+ // document.getElementsById("connect").click();
+//if (‘serviceWorker’ in navigator) {
+ //window.addEventListener(‘load’, function() {  
+//  navigator.serviceWorker.register(‘/sw.js’).then(
+//    function(registration) {
+      // Registration was successful
+ //     console.log(‘ServiceWorker registration successful with scope: ‘, registration.scope); },
+ //   function(err) {
+      // registration failed :(
+//      console.log(‘ServiceWorker registration failed: ‘, err);
+//    });
+//  });
+//}
+</script>
+
+<script src="main.js"></script>
+<!--<script src="companion.js" data-service-worker="sw.js"></script>-->
+
+</body>
+</html>
